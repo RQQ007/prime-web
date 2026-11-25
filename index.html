@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PRIME</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: тихий, сосредоточенный, ночной — ничего лишнего
+   IDEA: паутина, которую сплетаешь к одной цели; закрытые задачи втягиваются в центр
+   PICTURE: живая белая паутина на весь экран, 4 направления по диагоналям
+   COLOUR and TYPE: только белый на чёрном; Syncopate (логотип, девиз) + Manrope
+   LAYOUT: PRIME сверху, паутина в центре, направления по углам, TRUST THE PROCESS снизу */
+:root{color-scheme:dark;--ink:#f4f4f5;--dim:rgba(255,255,255,.56);--faint:rgba(255,255,255,.12);--panel:rgba(12,12,14,.9)}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:radial-gradient(ellipse at 50% 50%,#101013 0%,#060607 55%,#020203 100%);color:var(--ink);font:15px/1.5 Manrope,system-ui,sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+#web{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+.glitch{position:relative;display:inline-block;font-family:Syncopate,sans-serif;font-weight:700;color:#fff;white-space:nowrap;text-shadow:0 0 14px rgba(255,255,255,.35);padding-left:var(--ls);letter-spacing:var(--ls)}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;inset:0;padding-left:var(--ls);color:#fff;pointer-events:none}
+.glitch::before{clip-path:inset(22% 0 60% 0);transform:translateX(-.12em);opacity:.55;animation:g1 5s infinite steps(1)}
+.glitch::after{clip-path:inset(66% 0 12% 0);transform:translateX(.14em);opacity:.45;animation:g2 6.5s infinite steps(1)}
+@keyframes g1{0%,90%,100%{transform:translateX(-.12em);clip-path:inset(22% 0 60% 0)}92%{transform:translateX(-.4em);clip-path:inset(42% 0 38% 0)}95%{transform:translateX(.25em);clip-path:inset(8% 0 80% 0)}}
+@keyframes g2{0%,86%,100%{transform:translateX(.14em);clip-path:inset(66% 0 12% 0)}88%{transform:translateX(.45em);clip-path:inset(54% 0 30% 0)}91%{transform:translateX(-.2em);clip-path:inset(80% 0 4% 0)}}
+
+header{position:fixed;top:0;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 16px 0;pointer-events:none;z-index:2}
+.logo{--ls:.7em;font-size:15px}
+#goalLine{pointer-events:auto;background:none;border:0;padding:2px 8px;color:var(--dim);font-size:13px;border-radius:6px}
+#goalLine:hover{color:#fff}
+#goalLine b{color:#fff;font-weight:600}
+#gear{position:fixed;top:14px;right:14px;z-index:3;width:44px;height:44px;border-radius:50%;border:1px solid transparent;background:none;color:var(--dim);display:grid;place-items:center}
+#gear:hover{color:#fff;border-color:var(--faint)}
+#demo{pointer-events:auto;margin-top:2px;font-size:12px;color:var(--dim);border:1px solid var(--faint);border-radius:20px;padding:4px 12px;background:rgba(0,0,0,.4)}
+#demo button{background:none;border:0;color:#fff;text-decoration:underline;padding:0 0 0 4px}
+
+footer{position:fixed;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:14px;padding:0 16px 20px;z-index:2;pointer-events:none}
+.tagline{--ls:.42em;font-size:clamp(14px,2.3vw,26px)}
+.actions{display:flex;gap:10px;pointer-events:auto}
+.btn{height:44px;padding:0 20px;border-radius:22px;border:1px solid var(--faint);background:rgba(0,0,0,.5);color:#fff;font-weight:600;font-size:14px}
+.btn:hover{border-color:rgba(255,255,255,.35)}
+.btn.primary{background:#fff;color:#000;border-color:#fff}
+.btn.primary:hover{background:#e6e6e6}
+.btn:focus-visible,#goalLine:focus-visible,.dir:focus-visible,#gear:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+.dir{position:fixed;z-index:2;width:clamp(130px,16vw,190px);background:rgba(0,0,0,.35);border:1px solid transparent;border-radius:12px;padding:10px 12px;text-align:left;color:#fff}
+.dir:hover{border-color:var(--faint);background:rgba(10,10,12,.7)}
+.dir b{display:flex;justify-content:space-between;font-weight:700;font-size:14px}
+.dir b span{color:var(--dim);font-weight:500;font-variant-numeric:tabular-nums}
+.dir small{display:block;color:var(--dim);font-size:12px;margin:2px 0 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dir i{display:block;height:2px;background:var(--faint);border-radius:2px;overflow:hidden}
+.dir i em{display:block;height:100%;background:#fff;transition:width .6s}
+.dir.tl,.dir.tr{top:92px}.dir.bl,.dir.br{bottom:150px}
+.dir.tl,.dir.bl{left:16px}.dir.tr,.dir.br{right:16px;text-align:right}
+.dir.tr b,.dir.br b{flex-direction:row-reverse}
+
+#tip{position:fixed;z-index:4;pointer-events:none;background:var(--panel);border:1px solid var(--faint);border-radius:10px;padding:8px 12px;max-width:260px;font-size:13px;opacity:0;transition:opacity .15s}
+#tip.on{opacity:1}
+#tip b{display:block;font-size:14px}
+#tip span{color:var(--dim)}
+
+.modal{position:fixed;inset:0;z-index:10;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px}
+.modal[hidden]{display:none}
+.sheet{width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--panel);border:1px solid var(--faint);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:12px}
+.sheet h3{margin:0;font-size:20px;line-height:1.2;font-weight:700;text-wrap:balance}
+.lbl{font-size:12px;color:var(--dim);margin-bottom:-6px}
+.sheet input,.sheet select,.sheet textarea{width:100%;height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--faint);background:rgba(255,255,255,.04);font-size:16px;outline:none}
+.sheet textarea{height:90px;padding:10px 14px;font-size:13px;resize:vertical}
+.sheet input:focus,.sheet select:focus,.sheet textarea:focus{border-color:rgba(255,255,255,.5)}
+.sheet select option{background:#111}
+.chips,.seg{display:flex;flex-wrap:wrap;gap:8px}
+.chips button,.seg button{height:40px;padding:0 14px;border-radius:20px;border:1px solid var(--faint);background:none;font-size:14px;font-weight:600;color:var(--dim)}
+.chips button.on,.seg button.on{background:#fff;color:#000;border-color:#fff}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.row.end{justify-content:flex-end;margin-top:4px}
+.ghost{height:42px;padding:0 16px;border-radius:21px;border:1px solid var(--faint);background:none;font-weight:600;font-size:14px}
+.ghost:hover{border-color:rgba(255,255,255,.4)}
+.danger{color:#ff9b9b}
+.dimt{color:var(--dim);font-size:13px}
+.hold{position:relative;height:52px;border-radius:26px;border:1px solid #fff;background:none;color:#fff;font-weight:700;font-size:15px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none}
+.hold::before{content:"";position:absolute;inset:0;background:#fff;transform-origin:left;transform:scaleX(var(--p,0))}
+.hold span{position:relative;mix-blend-mode:difference}
+.dirs4{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.log li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 0;border-top:1px solid var(--faint)}
+.log li small{color:var(--dim);font-size:12px}
+.log li button{grid-row:span 2;align-self:center;background:none;border:0;color:var(--dim);font-size:12px;text-decoration:underline}
+.big3{display:flex;gap:18px}
+.big3 div{flex:1}
+.big3 b{display:block;font-family:Syncopate,sans-serif;font-size:24px}
+.big3 small{color:var(--dim);font-size:12px}
+.check{display:flex;align-items:center;gap:10px;font-size:14px}
+.check input{width:20px;height:20px}
+
+#cele{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:24px;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .5s}
+#cele.on{opacity:1;pointer-events:auto}
+#cele small{--ls:.5em;font-size:12px}
+#cele h2{margin:0;font-size:clamp(28px,5vw,52px);line-height:1.05;font-weight:700;text-wrap:balance;max-width:16ch}
+#cele p{margin:0;color:var(--dim)}
+
+#toast{position:fixed;left:50%;bottom:150px;transform:translate(-50%,20px);z-index:15;background:var(--panel);border:1px solid var(--faint);border-radius:24px;padding:10px 10px 10px 18px;display:flex;gap:12px;align-items:center;font-size:14px;opacity:0;pointer-events:none;transition:.3s;max-width:calc(100vw - 32px)}
+#toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#toast span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#toast button{height:34px;padding:0 14px;border-radius:17px;border:1px solid var(--faint);background:none;font-weight:600;flex:none}
+
+@media(max-width:700px){
+ .dir{width:calc(50vw - 24px);padding:8px 10px}
+ .dir small{display:none}
+ .dir.tl,.dir.tr{top:122px}.dir.bl,.dir.br{bottom:128px}
+ #demo{font-size:11px;padding:3px 10px}
+ #toast{bottom:128px}
+ footer{gap:10px;padding-bottom:16px}
+}
+@media(prefers-reduced-motion:reduce){.glitch::before,.glitch::after{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="web" aria-label="Паутина задач"></canvas>
+
+<header>
+ <div class="glitch logo" data-text="PRIME">PRIME</div>
+ <button id="goalLine" title="Изменить цель"></button>
+ <div id="demo" hidden>Это пример. <button id="demoClear">Начать своё</button></div>
+</header>
+<button id="gear" aria-label="Настройки"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+
+<div id="dirs"></div>
+<div id="tip"></div>
+
+<footer>
+ <div class="glitch tagline" data-text="TRUST THE PROCESS">TRUST THE PROCESS</div>
+ <div class="actions">
+  <button class="btn" id="btnLog">Сделано · 0</button>
+  <button class="btn primary" id="btnAdd">+ Задача</button>
+ </div>
+</footer>
+
+<div class="modal" id="mAdd" hidden>
+ <form class="sheet" id="fAdd" autocomplete="off">
+  <h3>Новая задача</h3>
+  <input id="aTitle" placeholder="Что сделать?" maxlength="80" required>
+  <div class="lbl">Направление</div>
+  <div class="chips" id="aDir"></div>
+  <div class="lbl">Тип</div>
+  <div class="seg" id="aType"><button type="button" data-v="step" class="on">Шаг</button><button type="button" data-v="big">Большая задача</button></div>
+  <div id="aParentWrap" style="display:flex;flex-direction:column;gap:12px"><div class="lbl">Ведёт к</div><select id="aParent"></select></div>
+  <div class="row end"><button type="button" class="ghost" data-close>Отмена</button><button type="button" class="ghost" id="aMore">Добавить ещё</button><button class="btn primary">Добавить</button></div>
+ </form>
+</div>
+
+<div class="modal" id="mNode" hidden>
+ <div class="sheet">
+  <div class="dimt" id="cMeta"></div>
+  <h3 id="cTitle"></h3>
+  <input id="cEdit" maxlength="80" hidden>
+  <div class="dimt" id="cInfo"></div>
+  <button class="hold" id="cHold"><span>Удерживай, чтобы закрыть</span></button>
+  <div class="row"><button class="ghost" id="cStep">+ Шаг сюда</button><button class="ghost" id="cRename">Изменить</button><button class="ghost danger" id="cDel">Удалить</button><button class="ghost" data-close style="margin-left:auto">Закрыть</button></div>
+ </div>
+</div>
+
+<div class="modal" id="mLog" hidden>
+ <div class="sheet">
+  <h3>Пройденный путь</h3>
+  <div class="big3" id="lStats"></div>
+  <ul class="log" id="lList"></ul>
+  <div class="row end"><button class="ghost" data-close>Закрыть</button></div>
+ </div>
+</div>
+
+<div class="modal" id="mSet" hidden>
+ <form class="sheet" id="fSet">
+  <h3>Цель и направления</h3>
+  <div class="lbl">Главная цель</div><input id="sGoal" maxlength="60">
+  <div class="lbl">Дата</div><input id="sDate" type="date">
+  <div class="lbl">Четыре направления</div><div class="dirs4" id="sDirs"></div>
+  <label class="check"><input type="checkbox" id="sSound"> Звук при закрытии</label>
+  <div class="lbl">Данные (резервная копия)</div>
+  <textarea id="sData" placeholder="Вставь сюда сохранённые данные, чтобы загрузить"></textarea>
+  <div class="row"><button type="button" class="ghost" id="sCopy">Скопировать данные</button><button type="button" class="ghost" id="sLoad">Загрузить</button></div>
+  <div class="row"><button type="button" class="ghost" id="sDemo">Вернуть пример</button><button type="button" class="ghost danger" id="sWipe">Начать с чистого листа</button></div>
+  <div class="row end"><button type="button" class="ghost" data-close>Отмена</button><button class="btn primary">Сохранить</button></div>
+ </form>
+</div>
+
+<div id="cele"><small class="glitch" data-text="ВЕХА ЗАКРЫТА">ВЕХА ЗАКРЫТА</small><h2 id="ceT"></h2><p id="ceP"></p></div>
+<div id="toast"><span id="tMsg"></span><button id="tUndo">Вернуть</button></div>
+
+<script>
+{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const cv=$('#web'), ctx=cv.getContext('2d');
+const ANG=[-135,-45,45,135].map(a=>a*Math.PI/180);
+const CORNER=['tl','tr','br','bl'];
+const R0=1.7, MINR=5, HOLD=700, KEY='prime.v1', DAY=864e5;
+const uid=()=>Math.random().toString(36).slice(2,10);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cut=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s;
+const fmtD=ts=>new Date(ts).toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+const plural=(n,a,b,c)=>{n=Math.abs(n)%100;const m=n%10;return n>10&&n<20?c:m>1&&m<5?b:m===1?a:c};
+
+function demo(){
+ const now=Date.now(),items=[];
+ const add=(dir,type,title,parent=null,ago=null)=>{const o={id:uid(),dir,type,title,parent,done:ago!==null,doneAt:ago!==null?now-ago*DAY:null};items.push(o);return o.id};
+ add(0,'step','Купить турник',null,12);add(0,'step','Записаться в зал',null,9);add(0,'step','Вис 30 секунд',null,3);
+ let b=add(0,'big','Подтянуться 10 раз');add(0,'step','Негативные 3×5',b);add(0,'step','Подтянуться 1 раз',b);add(0,'step','Подтянуться 5 раз',b);
+ b=add(0,'big','Пробежать 5 км');add(0,'step','Бег 1 км без остановки',b);add(0,'step','Бег 3 км',b);
+ add(1,'step','Неделя без телефона по утрам',null,6);add(1,'step','Медитация 10 минут');
+ b=add(1,'big','Прочитать 12 книг');add(1,'step','Дочитать текущую книгу',b);add(1,'step','Книга №2',b);add(1,'step','Книга №3',b);
+ add(2,'step','Посчитать расходы за месяц',null,4);
+ b=add(2,'big','Подушка на 3 месяца');add(2,'step','Открыть накопительный счёт',b);add(2,'step','Отложить 10% с зарплаты',b);add(2,'step','Отложить ещё 10%',b);
+ add(3,'step','Придумать идею PRIME',null,1);add(3,'step','Сделать визуал',null,0);
+ b=add(3,'big','Свой сайт PRIME');add(3,'step','Собрать прототип',b);add(3,'step','Залить на GitHub',b);
+ b=add(3,'big','Английский B2');add(3,'step','Выучить 100 слов',b);add(3,'step','Пройти тест уровня',b);add(3,'step','10 разговорных уроков',b);
+ return {goal:{title:'Лучшая версия себя',date:'2027-06-01'},dirs:['Тело','Разум','Деньги','Навыки'],items,demo:true,sound:true};
+}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.items)&&s.dirs)return s}catch(e){}return demo()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let S=load();
+
+/* ---------- модель паутины ---------- */
+// цепочка направления: [0] = ближайшая задача (самый край), дальше — к центру
+function chain(d){
+ const open=S.items.filter(i=>i.dir===d&&!i.done);
+ const bigs=open.filter(i=>i.type==='big'), ids=new Set(bigs.map(b=>b.id));
+ const out=open.filter(i=>i.type==='step'&&!ids.has(i.parent));
+ for(const b of bigs){out.push(...open.filter(i=>i.type==='step'&&i.parent===b.id),b)}
+ return out;
+}
+const weight=i=>i.type==='big'?3:1;
+function prog(list){const t=list.reduce((a,i)=>a+weight(i),0);return t?list.filter(i=>i.done).reduce((a,i)=>a+weight(i),0)/t:0}
+
+let chains=[[],[],[],[]], maxN=1, nodes=[], byD=[[],[],[],[]];
+const pos=new Map();
+let W=0,H=0,dpr=1;
+const V={cx:0,cy:0,s:40,ax:1.3,R:R0+MINR};
+const toS=(x,y)=>[V.cx+x*V.s*V.ax,V.cy+y*V.s];
+
+function rebuild(){
+ chains=[0,1,2,3].map(chain);
+ maxN=Math.max(1,...chains.map(c=>c.length));
+ save();ui();
+}
+
+function fitTarget(){
+ const mob=W<700, top=mob?178:96, bot=mob?184:150, side=mob?14:24;
+ const bh=Math.max(160,H-top-bot), R=R0+Math.max(maxN-1,MINR)+.7;
+ V.cx=W/2;V.cy=top+bh/2;
+ const ax=Math.min(1.7,Math.max(.7,(W-2*side)/bh));
+ V.ax+=(ax-V.ax)*.1;
+ const s=Math.min((W/2-side)/(R*V.ax),bh/2/R);
+ V.s+=(s-V.s)*.08;V.R+=(R-V.R)*.08;
+}
+
+/* ---------- эффекты ---------- */
+let pulses=[],rings=[],parts=[],wave=null,corePulse=0,hover=null,hold=null,last=performance.now();
+function burst(x,y,big){
+ rings.push({x,y,r:4,max:big?120:46,life:1});
+ for(let i=0;i<(big?36:14);i++){const a=Math.random()*6.283,v=(big?2.6:1.6)*(.4+Math.random());parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:1,sz:Math.random()*1.6+.6})}
+}
+
+/* ---------- отрисовка ---------- */
+function curve(pts){
+ ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+ for(let i=0;i<pts.length-1;i++){
+  const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+  ctx.bezierCurveTo(p1[0]+(p2[0]-p0[0])/6,p1[1]+(p2[1]-p0[1])/6,p2[0]-(p3[0]-p1[0])/6,p2[1]-(p3[1]-p1[1])/6,p2[0],p2[1]);
+ }
+}
+function sag(a,b,f){const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;ctx.moveTo(a[0],a[1]);ctx.quadraticCurveTo(V.cx+(mx-V.cx)*f,V.cy+(my-V.cy)*f,b[0],b[1])}
+
+function frame(now){
+ const dt=Math.min(50,now-last);last=now;
+ fitTarget();
+ ctx.clearRect(0,0,W,H);
+ const t=now;
+
+ // узлы
+ nodes=[];byD=[[],[],[],[]];
+ chains.forEach((c,d)=>{const n=c.length;c.forEach((it,i)=>{
+  const k=n-1-i, r=R0+k, off=it.type==='big'?0:(k%2?.36:-.36), a=ANG[d]+off/r;
+  const sw=Math.sin(t*.0008+k*.9+d*1.7)*.05;
+  const tx=Math.cos(a)*r-Math.sin(a)*sw, ty=Math.sin(a)*r+Math.cos(a)*sw;
+  let p=pos.get(it.id);if(!p){p={x:tx*.8,y:ty*.8};pos.set(it.id,p)}
+  p.x+=(tx-p.x)*.1;p.y+=(ty-p.y)*.1;
+  const [sx,sy]=toS(p.x,p.y), nd={it,d,k,i,sx,sy,tip:i===0};
+  nodes.push(nd);byD[d][k]=nd;
+ })});
+
+ // фон: призрачная паутина
+ ctx.lineWidth=1;
+ ctx.strokeStyle='rgba(255,255,255,.055)';
+ ctx.beginPath();
+ for(let j=0;j<16;j++){const a=j*Math.PI/8;const p=toS(Math.cos(a)*.6,Math.sin(a)*.6),q=toS(Math.cos(a)*(V.R+.2),Math.sin(a)*(V.R+.2));ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1])}
+ for(let k=0;R0+k<=V.R;k++){
+  const r=R0+k;
+  for(let j=0;j<16;j++){
+   const a1=j*Math.PI/8,a2=(j+1)*Math.PI/8;
+   const r1=r+Math.sin(t*.0006+j*1.3+k)*.04,r2=r+Math.sin(t*.0006+(j+1)*1.3+k)*.04;
+   sag(toS(Math.cos(a1)*r1,Math.sin(a1)*r1),toS(Math.cos(a2)*r2,Math.sin(a2)*r2),.93);
+  }
+ }
+ ctx.stroke();
+
+ // спиральные нити между направлениями
+ ctx.strokeStyle='rgba(255,255,255,.14)';ctx.beginPath();
+ for(let k=0;k<maxN;k++)for(let d=0;d<4;d++){const a=byD[d][k],b=byD[(d+1)%4][k];if(a&&b)sag([a.sx,a.sy],[b.sx,b.sy],.72)}
+ ctx.stroke();
+
+ // основные нити направлений
+ const C=[V.cx,V.cy];
+ for(let d=0;d<4;d++){
+  const arr=byD[d];if(!arr.length)continue;
+  const pts=[C,...arr.map(n=>[n.sx,n.sy])];
+  ctx.save();ctx.shadowColor='rgba(255,255,255,.7)';ctx.shadowBlur=10;
+  ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=1.4;curve(pts);ctx.stroke();ctx.restore();
+  ctx.save();ctx.setLineDash([2,16]);ctx.lineDashOffset=t*.03;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=2;curve(pts);ctx.stroke();ctx.restore();
+ }
+
+ // импульсы к центру
+ pulses=pulses.filter(p=>{
+  p.u+=dt*.006;const segs=p.path.length-1;
+  if(p.u>=segs){corePulse=1;return false}
+  const i=Math.floor(p.u),f=p.u-i,a=toS(...p.path[i]),b=toS(...p.path[i+1]);
+  const x=a[0]+(b[0]-a[0])*f,y=a[1]+(b[1]-a[1])*f;
+  ctx.save();ctx.shadowColor='#fff';ctx.shadowBlur=18;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x,y,3.4,0,7);ctx.fill();ctx.restore();
+  return true;
+ });
+
+ // точки
+ for(const n of nodes){
+  const big=n.it.type==='big', hov=hover&&hover.it.id===n.it.id;
+  let r=big?6:3.2; if(hov)r+=1.5;
+  if(big){ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(n.sx,n.sy,r+5,0,7);ctx.stroke()}
+  if(n.tip){const pr=r+7+Math.sin(t*.004+n.d)*2.5;ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(n.sx,n.sy,pr,0,7);ctx.stroke()}
+  ctx.save();ctx.shadowColor='#fff';ctx.shadowBlur=big||n.tip?14:6;ctx.fillStyle=big||n.tip?'#fff':'rgba(255,255,255,.82)';
+  ctx.beginPath();ctx.arc(n.sx,n.sy,r,0,7);ctx.fill();ctx.restore();
+  if(hold&&hold.id===n.it.id){const pr=Math.min(1,(now-hold.t0)/HOLD);ctx.strokeStyle='#fff';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(n.sx,n.sy,r+11,-Math.PI/2,-Math.PI/2+pr*6.283);ctx.stroke()}
+ }
+
+ // подписи: большие задачи и ближайшие шаги
+ ctx.textBaseline='middle';
+ for(const n of nodes){
+  const big=n.it.type==='big';if(!big&&!n.tip)continue;
+  ctx.font=(big?'600 12.5px ':'500 12px ')+'Manrope,sans-serif';
+  const txt=(n.tip&&!big?'› ':'')+cut(n.it.title,W<700?18:30), w=ctx.measureText(txt).width;
+  let right=n.sx>=V.cx, x=right?n.sx+16:n.sx-16;
+  if(right&&x+w>W-8){right=false;x=n.sx-16}else if(!right&&x-w<8){right=true;x=n.sx+16}
+  ctx.textAlign=right?'left':'right';
+  ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(right?x-3:x-w-3,n.sy-9,w+6,18);
+  ctx.fillStyle=n.tip?'#fff':'rgba(255,255,255,.75)';ctx.fillText(txt,x,n.sy+.5);
+ }
+
+ // ядро
+ corePulse*=.96;
+ const all=prog(S.items), cr=Math.max(20,Math.min(46,V.s*.62));
+ const g=ctx.createRadialGradient(V.cx,V.cy,cr*.6,V.cx,V.cy,cr*(3+corePulse*2));
+ g.addColorStop(0,`rgba(255,255,255,${.12+all*.18+corePulse*.35})`);g.addColorStop(1,'rgba(255,255,255,0)');
+ ctx.fillStyle=g;ctx.beginPath();ctx.arc(V.cx,V.cy,cr*(3+corePulse*2),0,7);ctx.fill();
+ ctx.fillStyle='#050506';ctx.beginPath();ctx.arc(V.cx,V.cy,cr,0,7);ctx.fill();
+ ctx.save();ctx.shadowColor='#fff';ctx.shadowBlur=16+corePulse*30;ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(V.cx,V.cy,cr,0,7);ctx.stroke();ctx.restore();
+ ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(V.cx,V.cy,cr+6,-Math.PI/2,-Math.PI/2+all*6.283);ctx.stroke();
+ ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(V.cx,V.cy,cr+6,0,7);ctx.stroke();
+ ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font=`700 ${Math.round(cr*.42)}px Syncopate,sans-serif`;ctx.fillText(Math.round(all*100)+'%',V.cx+cr*.04,V.cy+1);
+ if(!nodes.length){ctx.font='500 14px Manrope,sans-serif';ctx.fillStyle='rgba(255,255,255,.6)';ctx.fillText('Добавь первую задачу — паутина начнёт расти',V.cx,V.cy+cr+34)}
+
+ // волна вехи, кольца, частицы
+ if(wave){wave.r+=dt*.9;wave.life-=dt/1800;
+  if(wave.life<=0)wave=null;else{ctx.strokeStyle=`rgba(255,255,255,${wave.life*.6})`;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(V.cx,V.cy,wave.r*V.ax,wave.r,0,0,7);ctx.stroke()}}
+ rings=rings.filter(r=>{r.r+=(r.max-r.r)*.08;r.life-=dt/700;ctx.strokeStyle=`rgba(255,255,255,${Math.max(0,r.life)})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(r.x,r.y,r.r,0,7);ctx.stroke();return r.life>0});
+ ctx.fillStyle='#fff';
+ parts=parts.filter(p=>{p.x+=p.vx*dt*.06;p.y+=p.vy*dt*.06;p.vx*=.97;p.vy*=.97;p.life-=dt/1100;ctx.globalAlpha=Math.max(0,p.life);ctx.beginPath();ctx.arc(p.x,p.y,p.sz,0,7);ctx.fill();ctx.globalAlpha=1;return p.life>0});
+
+ if(hold&&now-hold.t0>=HOLD){const id=hold.id;hold=null;complete(id)}
+ requestAnimationFrame(frame);
+}
+
+function resize(){dpr=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+addEventListener('resize',resize);
+
+/* ---------- действия ---------- */
+let AC=null;
+function chime(big){
+ if(!S.sound)return;
+ try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const t0=AC.currentTime;
+  (big?[392,523.25,659.25,783.99,1046.5]:[1318.5,1975.5]).forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain(),st=t0+i*(big?.09:.05);
+   o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,st);g.gain.linearRampToValueAtTime(big?.07:.05,st+.015);g.gain.exponentialRampToValueAtTime(.0001,st+(big?2.4:.8));
+   o.connect(g).connect(AC.destination);o.start(st);o.stop(st+2.5)});
+ }catch(e){}
+}
+let lastDone=null,toastT=0;
+function toast(msg,undo){$('#tMsg').textContent=msg;$('#tUndo').hidden=!undo;$('#toast').classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>$('#toast').classList.remove('on'),5000)}
+
+function complete(id){
+ const it=S.items.find(i=>i.id===id);if(!it||it.done)return;
+ const n=nodes.find(m=>m.it.id===id);
+ if(n){
+  const p=pos.get(id),path=[[p.x,p.y]];
+  for(let k=n.k-1;k>=0;k--){const m=byD[n.d][k];if(m){const q=pos.get(m.it.id);path.push([q.x,q.y])}}
+  path.push([0,0]);pulses.push({path,u:0});burst(n.sx,n.sy,it.type==='big');
+ }
+ it.done=true;it.doneAt=Date.now();pos.delete(id);
+ rebuild();chime(it.type==='big');close('#mNode');
+ lastDone=id;
+ if(it.type==='big')celebrate(it);else toast('Закрыто: '+it.title,true);
+}
+function celebrate(it){
+ wave={r:10,life:1};corePulse=1;
+ $('#ceT').textContent=it.title;
+ $('#ceP').textContent=S.dirs[it.dir]+' · '+fmtD(it.doneAt);
+ $('#cele').classList.add('on');
+ setTimeout(()=>$('#cele').classList.remove('on'),2800);
+}
+$('#cele').onclick=()=>$('#cele').classList.remove('on');
+$('#tUndo').onclick=()=>{const it=S.items.find(i=>i.id===lastDone);if(it){it.done=false;it.doneAt=null;rebuild()}$('#toast').classList.remove('on')};
+
+/* ---------- интерфейс ---------- */
+function ui(){
+ const g=S.goal, days=Math.ceil((new Date(g.date+'T00:00')-new Date().setHours(0,0,0,0))/DAY);
+ const dateTxt=g.date?new Date(g.date+'T00:00').toLocaleDateString('ru-RU'):'';
+ $('#goalLine').innerHTML=`<b>${esc(g.title)}</b>${dateTxt?' · до '+dateTxt:''}${isFinite(days)?' · '+(days>=0?days+' '+plural(days,'день','дня','дней'):'срок прошёл'):''}`;
+ $('#demo').hidden=!S.demo;
+ $('#dirs').innerHTML=S.dirs.map((name,d)=>{
+  const list=S.items.filter(i=>i.dir===d), done=list.filter(i=>i.done).length, next=chains[d][0];
+  return `<button class="dir ${CORNER[d]}" data-d="${d}" title="Добавить задачу в «${esc(name)}»"><b>${esc(name)}<span>${done}/${list.length}</span></b><small>${next?'› '+esc(next.title):'Пусто — нажми, чтобы добавить'}</small><i><em style="width:${Math.round(prog(list)*100)}%"></em></i></button>`;
+ }).join('');
+ $('#btnLog').textContent='Сделано · '+S.items.filter(i=>i.done).length;
+}
+$('#dirs').onclick=e=>{const b=e.target.closest('.dir');if(b)openAdd(+b.dataset.d)};
+
+function open(id){$(id).hidden=false}
+function close(id){$(id).hidden=true}
+$$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m||e.target.closest('[data-close]'))m.hidden=true}));
+addEventListener('keydown',e=>{
+ if(e.key==='Escape'){$$('.modal').forEach(m=>m.hidden=true);$('#cele').classList.remove('on')}
+ if((e.key==='n'||e.key==='т')&&!e.target.closest('input,textarea,select')&&$$('.modal').every(m=>m.hidden)){e.preventDefault();openAdd()}
+});
+
+// добавление
+let aDir=0,aType='step';
+function openAdd(d=aDir,parent=null){
+ aDir=d;$('#aTitle').value='';
+ $('#aDir').innerHTML=S.dirs.map((n,i)=>`<button type="button" data-v="${i}" class="${i===aDir?'on':''}">${esc(n)}</button>`).join('');
+ if(parent)aType='step';
+ setType(aType);fillParents(parent);open('#mAdd');setTimeout(()=>$('#aTitle').focus(),30);
+}
+function setType(v){aType=v;$$('#aType button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('#aParentWrap').style.display=v==='step'?'flex':'none'}
+function fillParents(sel){
+ const bigs=S.items.filter(i=>i.dir===aDir&&i.type==='big'&&!i.done);
+ $('#aParent').innerHTML=`<option value="">Сам по себе</option>`+bigs.map(b=>`<option value="${b.id}">${esc(b.title)}</option>`).join('');
+ $('#aParent').value=sel||(bigs[0]?bigs[0].id:'');
+}
+$('#aDir').onclick=e=>{const b=e.target.closest('button');if(!b)return;aDir=+b.dataset.v;$$('#aDir button').forEach(x=>x.classList.toggle('on',x===b));fillParents()};
+$('#aType').onclick=e=>{const b=e.target.closest('button');if(b)setType(b.dataset.v)};
+function addItem(){
+ const title=$('#aTitle').value.trim();if(!title){$('#aTitle').focus();return false}
+ S.items.push({id:uid(),dir:aDir,type:aType,title,parent:aType==='step'?($('#aParent').value||null):null,done:false,doneAt:null});
+ rebuild();return true;
+}
+$('#fAdd').onsubmit=e=>{e.preventDefault();if(addItem()){close('#mAdd');toast('Нить добавлена: '+S.items.at(-1).title,false)}};
+$('#aMore').onclick=()=>{if(addItem()){const p=$('#aParent').value;$('#aTitle').value='';fillParents(p);$('#aTitle').focus();toast('Добавлено. Пиши следующую',false)}};
+$('#btnAdd').onclick=()=>openAdd();
+
+// карточка задачи
+let cur=null,delArm=false;
+function openCard(id){
+ const it=S.items.find(i=>i.id===id);if(!it)return;cur=it;delArm=false;
+ const big=it.type==='big', par=it.parent&&S.items.find(i=>i.id===it.parent);
+ const c=chains[it.dir], idx=c.indexOf(it);
+ $('#cMeta').textContent=S.dirs[it.dir]+' · '+(big?'большая задача':'шаг')+(idx===0?' · следующая':'');
+ $('#cTitle').textContent=it.title;$('#cTitle').hidden=false;$('#cEdit').hidden=true;
+ let info='';
+ if(big){const st=S.items.filter(i=>i.parent===it.id),od=st.filter(i=>!i.done).length;info=st.length?`Шагов: ${st.length-od} из ${st.length} пройдено`+(od?'. Можно закрыть и сейчас — оставшиеся шаги останутся в паутине.':''):'Пока без шагов. Добавь шаги, которые к ней ведут.'}
+ else info=par?'Ведёт к: '+par.title:'Отдельный шаг';
+ if(idx>0)info+=(info?' · ':'')+`До неё на этой нити ещё ${idx} ${plural(idx,'задача','задачи','задач')}`;
+ $('#cInfo').textContent=info;
+ $('#cStep').hidden=!big;$('#cRename').textContent='Изменить';$('#cDel').textContent='Удалить';
+ $('#cHold').style.setProperty('--p',0);
+ open('#mNode');
+}
+$('#cStep').onclick=()=>{close('#mNode');openAdd(cur.dir,cur.id)};
+$('#cRename').onclick=()=>{
+ const inp=$('#cEdit');
+ if(inp.hidden){inp.value=cur.title;inp.hidden=false;$('#cTitle').hidden=true;$('#cRename').textContent='Сохранить';inp.focus()}
+ else{const v=inp.value.trim();if(v){cur.title=v;rebuild()}openCard(cur.id)}
+};
+$('#cEdit').onkeydown=e=>{if(e.key==='Enter')$('#cRename').click()};
+$('#cDel').onclick=()=>{
+ if(!delArm){delArm=true;$('#cDel').textContent=cur.type==='big'?'Точно? Шаги останутся':'Точно удалить?';return}
+ S.items.forEach(i=>{if(i.parent===cur.id)i.parent=null});
+ S.items=S.items.filter(i=>i!==cur);pos.delete(cur.id);rebuild();close('#mNode');
+};
+// удержание кнопки
+let hb=null;
+function hbStart(e){if(hb)return;e.preventDefault();const t0=performance.now();hb={t0};
+ const step=()=>{if(!hb)return;const p=Math.min(1,(performance.now()-t0)/HOLD);$('#cHold').style.setProperty('--p',p);if(p>=1){hb=null;complete(cur.id);return}requestAnimationFrame(step)};step()}
+function hbStop(){if(!hb)return;hb=null;$('#cHold').style.setProperty('--p',0)}
+$('#cHold').addEventListener('pointerdown',hbStart);
+['pointerup','pointerleave','pointercancel'].forEach(ev=>$('#cHold').addEventListener(ev,hbStop));
+$('#cHold').addEventListener('keydown',e=>{if((e.key===' '||e.key==='Enter')&&!e.repeat)hbStart(e)});
+$('#cHold').addEventListener('keyup',hbStop);
+
+// журнал
+$('#btnLog').onclick=()=>{
+ const done=S.items.filter(i=>i.done).sort((a,b)=>b.doneAt-a.doneAt);
+ const wk=done.filter(i=>Date.now()-i.doneAt<7*DAY).length, bg=done.filter(i=>i.type==='big').length;
+ $('#lStats').innerHTML=`<div><b>${done.length}</b><small>всего</small></div><div><b>${wk}</b><small>за 7 дней</small></div><div><b>${bg}</b><small>больших</small></div>`;
+ $('#lList').innerHTML=done.length?done.map(i=>`<li><span>${i.type==='big'?'◆ ':''}${esc(i.title)}</span><button data-id="${i.id}">вернуть</button><small>${esc(S.dirs[i.dir])} · ${fmtD(i.doneAt)}</small></li>`).join(''):'<li class="dimt">Здесь будет всё, что ты закроешь.</li>';
+ open('#mLog');
+};
+$('#lList').onclick=e=>{const b=e.target.closest('button[data-id]');if(!b)return;const it=S.items.find(i=>i.id===b.dataset.id);if(it){it.done=false;it.doneAt=null;rebuild();$('#btnLog').click()}};
+
+// настройки
+function openSet(){
+ $('#sGoal').value=S.goal.title;$('#sDate').value=S.goal.date||'';$('#sSound').checked=!!S.sound;$('#sData').value='';
+ $('#sDirs').innerHTML=S.dirs.map((n,i)=>`<input data-i="${i}" value="${esc(n)}" maxlength="18" aria-label="Направление ${i+1}">`).join('');
+ open('#mSet');
+}
+$('#gear').onclick=openSet;$('#goalLine').onclick=openSet;
+$('#fSet').onsubmit=e=>{e.preventDefault();
+ S.goal.title=$('#sGoal').value.trim()||'Моя цель';S.goal.date=$('#sDate').value;S.sound=$('#sSound').checked;
+ $$('#sDirs input').forEach(inp=>S.dirs[+inp.dataset.i]=inp.value.trim()||'Направление '+(+inp.dataset.i+1));
+ rebuild();close('#mSet');
+};
+$('#sCopy').onclick=async()=>{const txt=JSON.stringify(S);try{await navigator.clipboard.writeText(txt);toast('Данные скопированы — сохрани их где-нибудь',false)}catch(e){$('#sData').value=txt;$('#sData').select();toast('Скопируй текст из поля',false)}};
+$('#sLoad').onclick=()=>{try{const s=JSON.parse($('#sData').value);if(!s||!Array.isArray(s.items)||!Array.isArray(s.dirs))throw 0;S=s;pos.clear();rebuild();close('#mSet');toast('Данные загружены',false)}catch(e){toast('Не получилось прочитать данные',false)}};
+function wipe(){S={goal:{title:'Моя цель',date:''},dirs:[...S.dirs],items:[],demo:false,sound:S.sound!==false};pos.clear();rebuild()}
+$('#sWipe').onclick=()=>{const b=$('#sWipe');if(b.dataset.arm){delete b.dataset.arm;b.textContent='Начать с чистого листа';wipe();openSet();return}b.dataset.arm=1;b.textContent='Точно? Всё удалится'};
+$('#sDemo').onclick=()=>{S=demo();pos.clear();rebuild();close('#mSet')};
+$('#demoClear').onclick=()=>{wipe();openSet()};
+
+/* ---------- указатель по паутине ---------- */
+function hit(x,y){let best=null,bd=22*22;for(const n of nodes){const d=(n.sx-x)**2+(n.sy-y)**2;if(d<bd){bd=d;best=n}}return best}
+const tip=$('#tip');
+cv.addEventListener('pointermove',e=>{
+ if(hold&&Math.hypot(e.clientX-hold.x,e.clientY-hold.y)>12)hold=null;
+ if(e.pointerType!=='mouse')return;
+ hover=hit(e.clientX,e.clientY);cv.style.cursor=hover?'pointer':'default';
+ if(hover){const it=hover.it,par=it.parent&&S.items.find(i=>i.id===it.parent);
+  tip.innerHTML=`<b>${esc(it.title)}</b><span>${esc(S.dirs[it.dir])} · ${it.type==='big'?'большая задача':'шаг'}${par&&!par.done?' → '+esc(par.title):''}</span><br><span>клик — открыть · удерживай — закрыть</span>`;
+  tip.style.left=Math.min(e.clientX+16,W-280)+'px';tip.style.top=Math.min(e.clientY+16,H-90)+'px';tip.classList.add('on')}
+ else tip.classList.remove('on');
+});
+cv.addEventListener('pointerleave',()=>{hover=null;tip.classList.remove('on')});
+cv.addEventListener('pointerdown',e=>{const n=hit(e.clientX,e.clientY);if(!n)return;tip.classList.remove('on');hover=null;hold={id:n.it.id,t0:performance.now(),x:e.clientX,y:e.clientY};try{cv.setPointerCapture(e.pointerId)}catch(_){}});
+cv.addEventListener('pointerup',()=>{if(hold){const id=hold.id;hold=null;tip.classList.remove('on');openCard(id)}});
+cv.addEventListener('pointercancel',()=>hold=null);
+
+resize();rebuild();
+V.s=Math.min((W/2-24)/((R0+MINR+.7)*1.3),(H-246)/2/(R0+MINR+.7));
+requestAnimationFrame(frame);
+}
+</script>
+</body>
+</html>
