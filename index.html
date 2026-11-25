@@ -84,6 +84,16 @@ footer{position:fixed;left:0;right:0;bottom:0;display:flex;flex-direction:column
 .hold{position:relative;height:52px;border-radius:26px;border:1px solid #fff;background:none;color:#fff;font-weight:700;font-size:15px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none}
 .hold::before{content:"";position:absolute;inset:0;background:#fff;transform-origin:left;transform:scaleX(var(--p,0))}
 .hold span{position:relative;mix-blend-mode:difference}
+.cview{display:flex;flex-direction:column;gap:10px}
+.cview[hidden],.row[hidden],.hold[hidden],.ghost[hidden]{display:none}
+.cview h3{overflow-wrap:anywhere}
+.note{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;color:rgba(255,255,255,.82);font-size:15px}
+.note:empty{display:none}
+.due{font-size:14px;font-weight:600}
+.due:empty{display:none}
+.due.late{text-decoration:underline;text-decoration-style:dashed;text-underline-offset:4px}
+.sheet textarea#eTitle{height:auto;font-size:16px;font-weight:600}
+.sheet textarea#eNote{height:auto;font-size:15px}
 .dirs4{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
 .log li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 0;border-top:1px solid var(--faint)}
@@ -148,6 +158,7 @@ footer{position:fixed;left:0;right:0;bottom:0;display:flex;flex-direction:column
   <div class="lbl">Тип</div>
   <div class="seg" id="aType"><button type="button" data-v="step" class="on">Шаг</button><button type="button" data-v="big">Большая задача</button></div>
   <div id="aParentWrap" style="display:flex;flex-direction:column;gap:12px"><div class="lbl">Ведёт к</div><select id="aParent"></select></div>
+  <div class="lbl">Дедлайн (необязательно)</div><input id="aDue" type="date">
   <div class="row end"><button type="button" class="ghost" data-close>Отмена</button><button type="button" class="ghost" id="aMore">Добавить ещё</button><button class="btn primary">Добавить</button></div>
  </form>
 </div>
@@ -155,11 +166,21 @@ footer{position:fixed;left:0;right:0;bottom:0;display:flex;flex-direction:column
 <div class="modal" id="mNode" hidden>
  <div class="sheet">
   <div class="dimt" id="cMeta"></div>
-  <h3 id="cTitle"></h3>
-  <input id="cEdit" maxlength="80" hidden>
-  <div class="dimt" id="cInfo"></div>
+  <div id="cView" class="cview">
+   <h3 id="cTitle"></h3>
+   <p id="cNote" class="note"></p>
+   <div id="cDue" class="due"></div>
+   <div class="dimt" id="cInfo"></div>
+  </div>
+  <div id="cForm" class="cview" hidden>
+   <div class="lbl">Название</div><textarea id="eTitle" maxlength="160" rows="2"></textarea>
+   <div class="lbl">Описание</div><textarea id="eNote" maxlength="1000" rows="4" placeholder="Подробности, как именно сделать, зачем"></textarea>
+   <div class="lbl">Дедлайн</div><div class="row"><input id="eDue" type="date" style="flex:1"><button type="button" class="ghost" id="eDueClr">Убрать</button></div>
+   <div class="row end"><button type="button" class="ghost" id="eCancel">Отмена</button><button type="button" class="btn primary" id="eSave">Сохранить</button></div>
+  </div>
   <button class="hold" id="cHold"><span>Удерживай, чтобы закрыть</span></button>
-  <div class="row"><button class="ghost" id="cStep">+ Шаг сюда</button><button class="ghost" id="cRename">Изменить</button><button class="ghost danger" id="cDel">Удалить</button><button class="ghost" data-close style="margin-left:auto">Закрыть</button></div>
+  <div class="row" id="cOrder"><span class="dimt" style="align-self:center">Место в очереди:</span><button class="ghost" id="cIn">← К центру</button><button class="ghost" id="cOut">От центра →</button></div>
+  <div class="row" id="cActs"><button class="ghost" id="cStep">+ Шаг сюда</button><button class="ghost" id="cRename">Изменить</button><button class="ghost danger" id="cDel">Удалить</button><button class="ghost" data-close style="margin-left:auto">Закрыть</button></div>
  </div>
 </div>
 
@@ -216,6 +237,10 @@ function demo(){
  add(3,'step','Придумать идею PRIME',null,1);add(3,'step','Сделать визуал',null,0);
  b=add(3,'big','Свой сайт PRIME');add(3,'step','Собрать прототип',b);add(3,'step','Залить на GitHub',b);
  b=add(3,'big','Английский B2');add(3,'step','Выучить 100 слов',b);add(3,'step','Пройти тест уровня',b);add(3,'step','10 разговорных уроков',b);
+ const iso=days=>{const d=new Date(now+days*DAY);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+ [['Подтянуться 10 раз',120],['Негативные 3×5',2],['Собрать прототип',0],['Свой сайт PRIME',14],['Подушка на 3 месяца',90],['Открыть накопительный счёт',-1]]
+  .forEach(([t,d])=>{const it=items.find(i=>i.title===t);if(it)it.due=iso(d)});
+ items.find(i=>i.title==='Подтянуться 10 раз').note='Цель — 10 чистых подтягиваний подряд, без рывков. Тренировки 3 раза в неделю: вис, негативы, потом подходы с запасом.';
  return {goal:{title:'Лучшая версия себя',date:'2027-06-01'},dirs:['Тело','Разум','Деньги','Навыки'],items,demo:true,sound:true};
 }
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.items)&&s.dirs)return s}catch(e){}return demo()}
@@ -228,12 +253,34 @@ function chain(d){
  const open=S.items.filter(i=>i.dir===d&&!i.done);
  const bigs=open.filter(i=>i.type==='big'), ids=new Set(bigs.map(b=>b.id));
  const out=open.filter(i=>i.type==='step'&&!ids.has(i.parent));
- for(const b of bigs){out.push(...open.filter(i=>i.type==='step'&&i.parent===b.id),b)}
+ // первая добавленная большая задача — ближе всех к центру, новые встают дальше
+ for(const b of [...bigs].reverse()){out.push(...open.filter(i=>i.type==='step'&&i.parent===b.id),b)}
  return out;
+}
+// радиусы: вокруг больших задач больше воздуха
+function radii(c){
+ const n=c.length,rad=new Array(n);let r=R0;
+ for(let i=n-1;i>=0;i--){
+  if(i<n-1)r+=1+((c[i].type==='big'||c[i+1].type==='big')?.7:0);
+  else if(c[i].type==='big')r+=.3;
+  rad[i]=r;
+ }
+ return rad;
+}
+const todayTs=()=>new Date().setHours(0,0,0,0);
+const dueDays=it=>it.due?Math.round((new Date(it.due+'T00:00')-todayTs())/DAY):null;
+const shortD=s=>new Date(s+'T00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'}).replace('.','');
+function dueText(it){
+ const d=dueDays(it);if(d===null)return '';
+ if(d<0)return 'просрочено на '+(-d)+' '+plural(-d,'день','дня','дней');
+ if(d===0)return 'дедлайн сегодня';
+ if(d===1)return 'дедлайн завтра';
+ return 'до '+shortD(it.due)+' · через '+d+' '+plural(d,'день','дня','дней');
 }
 const weight=i=>i.type==='big'?3:1;
 function prog(list){const t=list.reduce((a,i)=>a+weight(i),0);return t?list.filter(i=>i.done).reduce((a,i)=>a+weight(i),0)/t:0}
 
+let rads=[[],[],[],[]], maxRad=R0;
 let chains=[[],[],[],[]], maxN=1, nodes=[], byD=[[],[],[],[]];
 const pos=new Map();
 let W=0,H=0,dpr=1;
@@ -242,13 +289,15 @@ const toS=(x,y)=>[V.cx+x*V.s*V.ax,V.cy+y*V.s];
 
 function rebuild(){
  chains=[0,1,2,3].map(chain);
+ rads=chains.map(radii);
  maxN=Math.max(1,...chains.map(c=>c.length));
+ maxRad=Math.max(R0,...rads.map(r=>r.length?r[0]:R0));
  save();ui();
 }
 
 function fitTarget(){
  const mob=W<700, top=mob?178:96, bot=mob?184:150, side=mob?14:24;
- const bh=Math.max(160,H-top-bot), R=R0+Math.max(maxN-1,MINR)+.7;
+ const bh=Math.max(160,H-top-bot), R=Math.max(maxRad,R0+MINR)+.8;
  V.cx=W/2;V.cy=top+bh/2;
  const ax=Math.min(1.7,Math.max(.7,(W-2*side)/bh));
  V.ax+=(ax-V.ax)*.1;
@@ -282,7 +331,7 @@ function frame(now){
  // узлы
  nodes=[];byD=[[],[],[],[]];
  chains.forEach((c,d)=>{const n=c.length;c.forEach((it,i)=>{
-  const k=n-1-i, r=R0+k, off=it.type==='big'?0:(k%2?.36:-.36), a=ANG[d]+off/r;
+  const k=n-1-i, r=rads[d][i], off=it.type==='big'?0:(k%2?.4:-.4), a=ANG[d]+off/r;
   const sw=Math.sin(t*.0008+k*.9+d*1.7)*.05;
   const tx=Math.cos(a)*r-Math.sin(a)*sw, ty=Math.sin(a)*r+Math.cos(a)*sw;
   let p=pos.get(it.id);if(!p){p={x:tx*.8,y:ty*.8};pos.set(it.id,p)}
@@ -336,6 +385,8 @@ function frame(now){
   const big=n.it.type==='big', hov=hover&&hover.it.id===n.it.id;
   let r=big?6:3.2; if(hov)r+=1.5;
   if(big){ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(n.sx,n.sy,r+5,0,7);ctx.stroke()}
+  const od=dueDays(n.it);
+  if(od!==null&&od<=1){ctx.save();ctx.setLineDash([3,3]);ctx.lineDashOffset=-t*.02;ctx.strokeStyle=`rgba(255,255,255,${od<0?.55+Math.sin(t*.006)*.35:.5})`;ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(n.sx,n.sy,r+(big?10:7),0,7);ctx.stroke();ctx.restore()}
   if(n.tip){const pr=r+7+Math.sin(t*.004+n.d)*2.5;ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(n.sx,n.sy,pr,0,7);ctx.stroke()}
   ctx.save();ctx.shadowColor='#fff';ctx.shadowBlur=big||n.tip?14:6;ctx.fillStyle=big||n.tip?'#fff':'rgba(255,255,255,.82)';
   ctx.beginPath();ctx.arc(n.sx,n.sy,r,0,7);ctx.fill();ctx.restore();
@@ -347,7 +398,8 @@ function frame(now){
  for(const n of nodes){
   const big=n.it.type==='big';if(!big&&!n.tip)continue;
   ctx.font=(big?'600 12.5px ':'500 12px ')+'Manrope,sans-serif';
-  const txt=(n.tip&&!big?'› ':'')+cut(n.it.title,W<700?18:30), w=ctx.measureText(txt).width;
+  const dd=dueDays(n.it), ds=dd===null?'':dd<0?' · просрочено':' · '+(dd===0?'сегодня':shortD(n.it.due));
+  const txt=(n.tip&&!big?'› ':'')+cut(n.it.title,W<700?18:30)+ds, w=ctx.measureText(txt).width;
   let right=n.sx>=V.cx, x=right?n.sx+16:n.sx-16;
   if(right&&x+w>W-8){right=false;x=n.sx-16}else if(!right&&x-w<8){right=true;x=n.sx+16}
   ctx.textAlign=right?'left':'right';
@@ -443,7 +495,7 @@ addEventListener('keydown',e=>{
 // добавление
 let aDir=0,aType='step';
 function openAdd(d=aDir,parent=null){
- aDir=d;$('#aTitle').value='';
+ aDir=d;$('#aTitle').value='';$('#aDue').value='';
  $('#aDir').innerHTML=S.dirs.map((n,i)=>`<button type="button" data-v="${i}" class="${i===aDir?'on':''}">${esc(n)}</button>`).join('');
  if(parent)aType='step';
  setType(aType);fillParents(parent);open('#mAdd');setTimeout(()=>$('#aTitle').focus(),30);
@@ -458,37 +510,63 @@ $('#aDir').onclick=e=>{const b=e.target.closest('button');if(!b)return;aDir=+b.d
 $('#aType').onclick=e=>{const b=e.target.closest('button');if(b)setType(b.dataset.v)};
 function addItem(){
  const title=$('#aTitle').value.trim();if(!title){$('#aTitle').focus();return false}
- S.items.push({id:uid(),dir:aDir,type:aType,title,parent:aType==='step'?($('#aParent').value||null):null,done:false,doneAt:null});
+ S.items.push({id:uid(),dir:aDir,type:aType,title,parent:aType==='step'?($('#aParent').value||null):null,due:$('#aDue').value||null,note:'',done:false,doneAt:null});
  rebuild();return true;
 }
 $('#fAdd').onsubmit=e=>{e.preventDefault();if(addItem()){close('#mAdd');toast('Нить добавлена: '+S.items.at(-1).title,false)}};
-$('#aMore').onclick=()=>{if(addItem()){const p=$('#aParent').value;$('#aTitle').value='';fillParents(p);$('#aTitle').focus();toast('Добавлено. Пиши следующую',false)}};
+$('#aMore').onclick=()=>{if(addItem()){const p=$('#aParent').value;$('#aTitle').value='';$('#aDue').value='';fillParents(p);$('#aTitle').focus();toast('Добавлено. Пиши следующую',false)}};
 $('#btnAdd').onclick=()=>openAdd();
 
 // карточка задачи
 let cur=null,delArm=false;
+function group(it){return S.items.filter(i=>!i.done&&i.dir===it.dir&&i.type===it.type&&(it.type==='big'||(i.parent||null)===(it.parent||null)))}
+function neighbour(it,toCenter){
+ const g=group(it),j=g.indexOf(it);
+ // большие: раньше в списке = ближе к центру; шаги: позже в списке = ближе к центру
+ const k=it.type==='big'?(toCenter?j-1:j+1):(toCenter?j+1:j-1);
+ return g[k]||null;
+}
+function move(toCenter){
+ const nb=neighbour(cur,toCenter);if(!nb)return;
+ const a=S.items.indexOf(cur),b=S.items.indexOf(nb);
+ S.items[a]=nb;S.items[b]=cur;rebuild();openCard(cur.id);
+}
+$('#cIn').onclick=()=>move(true);
+$('#cOut').onclick=()=>move(false);
 function openCard(id){
  const it=S.items.find(i=>i.id===id);if(!it)return;cur=it;delArm=false;
  const big=it.type==='big', par=it.parent&&S.items.find(i=>i.id===it.parent);
  const c=chains[it.dir], idx=c.indexOf(it);
  $('#cMeta').textContent=S.dirs[it.dir]+' · '+(big?'большая задача':'шаг')+(idx===0?' · следующая':'');
- $('#cTitle').textContent=it.title;$('#cTitle').hidden=false;$('#cEdit').hidden=true;
+ $('#cTitle').textContent=it.title;
+ $('#cNote').textContent=it.note||'';
+ const dd=dueDays(it);$('#cDue').textContent=dueText(it);$('#cDue').classList.toggle('late',dd!==null&&dd<0);
  let info='';
  if(big){const st=S.items.filter(i=>i.parent===it.id),od=st.filter(i=>!i.done).length;info=st.length?`Шагов: ${st.length-od} из ${st.length} пройдено`+(od?'. Можно закрыть и сейчас — оставшиеся шаги останутся в паутине.':''):'Пока без шагов. Добавь шаги, которые к ней ведут.'}
  else info=par?'Ведёт к: '+par.title:'Отдельный шаг';
  if(idx>0)info+=(info?' · ':'')+`До неё на этой нити ещё ${idx} ${plural(idx,'задача','задачи','задач')}`;
  $('#cInfo').textContent=info;
- $('#cStep').hidden=!big;$('#cRename').textContent='Изменить';$('#cDel').textContent='Удалить';
+ $('#cView').hidden=false;$('#cForm').hidden=true;$('#cHold').hidden=false;$('#cActs').hidden=false;
+ const ni=neighbour(it,true),no=neighbour(it,false);
+ $('#cOrder').hidden=!ni&&!no;$('#cIn').disabled=!ni;$('#cOut').disabled=!no;
+ $('#cIn').style.opacity=ni?1:.35;$('#cOut').style.opacity=no?1:.35;
+ $('#cStep').hidden=!big;$('#cDel').textContent='Удалить';
  $('#cHold').style.setProperty('--p',0);
  open('#mNode');
 }
 $('#cStep').onclick=()=>{close('#mNode');openAdd(cur.dir,cur.id)};
 $('#cRename').onclick=()=>{
- const inp=$('#cEdit');
- if(inp.hidden){inp.value=cur.title;inp.hidden=false;$('#cTitle').hidden=true;$('#cRename').textContent='Сохранить';inp.focus()}
- else{const v=inp.value.trim();if(v){cur.title=v;rebuild()}openCard(cur.id)}
+ $('#eTitle').value=cur.title;$('#eNote').value=cur.note||'';$('#eDue').value=cur.due||'';
+ $('#cView').hidden=true;$('#cForm').hidden=false;$('#cHold').hidden=true;$('#cActs').hidden=true;$('#cOrder').hidden=true;
+ $('#eTitle').focus();
 };
-$('#cEdit').onkeydown=e=>{if(e.key==='Enter')$('#cRename').click()};
+$('#eDueClr').onclick=()=>$('#eDue').value='';
+$('#eCancel').onclick=()=>openCard(cur.id);
+$('#eSave').onclick=()=>{
+ const v=$('#eTitle').value.trim().replace(/\s+/g,' ');if(!v){$('#eTitle').focus();return}
+ cur.title=v;cur.note=$('#eNote').value.trim();cur.due=$('#eDue').value||null;
+ rebuild();openCard(cur.id);
+};
 $('#cDel').onclick=()=>{
  if(!delArm){delArm=true;$('#cDel').textContent=cur.type==='big'?'Точно? Шаги останутся':'Точно удалить?';return}
  S.items.forEach(i=>{if(i.parent===cur.id)i.parent=null});
@@ -541,7 +619,7 @@ cv.addEventListener('pointermove',e=>{
  if(e.pointerType!=='mouse')return;
  hover=hit(e.clientX,e.clientY);cv.style.cursor=hover?'pointer':'default';
  if(hover){const it=hover.it,par=it.parent&&S.items.find(i=>i.id===it.parent);
-  tip.innerHTML=`<b>${esc(it.title)}</b><span>${esc(S.dirs[it.dir])} · ${it.type==='big'?'большая задача':'шаг'}${par&&!par.done?' → '+esc(par.title):''}</span><br><span>клик — открыть · удерживай — закрыть</span>`;
+  tip.innerHTML=`<b>${esc(it.title)}</b><span>${esc(S.dirs[it.dir])} · ${it.type==='big'?'большая задача':'шаг'}${par&&!par.done?' → '+esc(par.title):''}</span>${it.due?'<br><span>'+esc(dueText(it))+'</span>':''}${it.note?'<br><span>'+esc(cut(it.note,90))+'</span>':''}<br><span>клик — открыть · удерживай — закрыть</span>`;
   tip.style.left=Math.min(e.clientX+16,W-280)+'px';tip.style.top=Math.min(e.clientY+16,H-90)+'px';tip.classList.add('on')}
  else tip.classList.remove('on');
 });
